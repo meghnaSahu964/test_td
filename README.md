@@ -8,6 +8,7 @@ npm run dev
 ```
 
 Build and validate with `npm run lint`, `npm run typecheck`, and `npm run build`.
+GitHub Actions runs these checks on pushes and pull requests targeting `master`.
 
 ## Production configuration
 
