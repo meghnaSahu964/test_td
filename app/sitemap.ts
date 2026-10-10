@@ -1,0 +1,1 @@
+import type { MetadataRoute } from "next"; import { business } from "@/config/business"; export default function sitemap():MetadataRoute.Sitemap{return ['','/about','/services','/properties','/investment','/contact','/privacy','/terms'].map(path=>({url:`${business.website}${path}`,lastModified:new Date()}))}

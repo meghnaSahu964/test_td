@@ -1,0 +1,1 @@
+"use client";import{useParams}from"next/navigation";import{AdminLayout,PropertyForm}from"@/components/admin";export default function Edit(){const{id}=useParams<{id:string}>();return <AdminLayout><h1 className="mb-7 text-3xl">Edit Property</h1><PropertyForm id={id}/></AdminLayout>}
