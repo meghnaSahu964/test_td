@@ -1,0 +1,1 @@
+def intentional_failure(:
