@@ -4,10 +4,10 @@ from fastapi import UploadFile
 from redis import Redis
 from .core.config import settings
 log=logging.getLogger(__name__)
-def redis_client():
+def redis_client() -> Redis | None:
     try: return Redis.from_url(settings.redis_url,decode_responses=True,socket_connect_timeout=.2)
     except Exception: return None
-def rate_limit(key:str, limit:int, seconds:int):
+def rate_limit(key:str, limit:int, seconds:int) -> None:
     r=redis_client()
     if not r: return
     try:
@@ -20,6 +20,6 @@ class StorageService:
         if settings.storage_provider!="local": raise RuntimeError("Cloud storage provider is not configured")
         target=Path("uploads"); target.mkdir(exist_ok=True); name=f"{file.filename}".replace("/","").replace("\\","")
         (target/name).write_bytes(await file.read()); return f"/uploads/{name}"
-def notify(kind:str):
+def notify(kind:str) -> None:
     if not settings.smtp_host: log.info("%s stored; SMTP notification is not configured",kind); return
     log.info("%s notification delivery should be handled by configured SMTP worker",kind)
