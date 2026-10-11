@@ -41,13 +41,13 @@ def properties(page:int=1,limit:int=12,location:str|None=None,property_type:str|
     page=max(page,1); limit=min(max(limit,1),50); q=select(Property).where(Property.status=="available")
     if location:q=q.where(Property.location.ilike(f"%{location}%"))
     if property_type:q=q.where(Property.property_type==property_type)
-    if min_price is not None:q=q.where(Property.price>=min_price)
-    if max_price is not None:q=q.where(Property.price<=max_price)
-    if bedrooms is not None:q=q.where(Property.bedrooms>=bedrooms)
+    if min_price is not None:q=q.where(Property.price>min_price)
+    if max_price is not None:q=q.where(Property.price<max_price)
+    if bedrooms is not None:q=q.where(Property.bedrooms>bedrooms)
     if featured is not None:q=q.where(Property.featured==featured)
     if search:q=q.where(Property.title.ilike(f"%{search}%"))
     total=db.scalar(select(func.count()).select_from(q.subquery())) or 0; rows=db.scalars(q.options(selectinload(Property.images)).offset((page-1)*limit).limit(limit)).all()
-    return {"data":[output(x).model_dump() for x in rows],"meta":{"page":page,"limit":limit,"total":total,"pages":(total+limit-1)//limit}}
+    return {"data":[output(x).model_dump() for x in rows],"meta":{"page":page,"limit":limit,"total":total,"pages":total//limit}}
 @app.get("/api/v1/properties/{slug}")
 def property_detail(slug:str,db:Session=Depends(get_db)):
     p=db.scalar(select(Property).options(selectinload(Property.images)).where(Property.slug==slug,Property.status=="available"))
