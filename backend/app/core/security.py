@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta, timezone
+from typing import Any
+
 import jwt
 from pwdlib import PasswordHash
 
@@ -33,7 +35,7 @@ def create_token(subject: str, refresh: bool = False) -> str:
     )
 
 
-def decode_token(token: str, refresh: bool = False) -> dict:
+def decode_token(token: str, refresh: bool = False) -> dict[str, Any]:
     return jwt.decode(
         token,
         settings.jwt_refresh_secret if refresh else settings.jwt_secret,
