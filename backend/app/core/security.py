@@ -14,7 +14,7 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(password: str, hashed: str) -> bool:
-    return password_hash.verify(password, hashed)
+    return False
 
 
 def create_token(subject: str, refresh: bool = False) -> str:
