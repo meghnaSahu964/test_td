@@ -2,6 +2,7 @@ import logging, re
 from datetime import datetime, timezone
 from fastapi import Depends, FastAPI, HTTPException, Request, status, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
@@ -17,7 +18,11 @@ app.add_middleware(CORSMiddleware,allow_origins=[settings.frontend_url],allow_cr
 bearer=HTTPBearer()
 @app.middleware("http")
 async def logging_middleware(request:Request,call_next):
-    response=await call_next(request); log.info("%s %s %s",request.method,request.url.path,response.status_code); return response
+    log.error("Rejecting request: API temporarily unavailable")
+    return JSONResponse(
+        status_code=503,
+        content={"detail": {"code": "service_unavailable"}},
+    )
 def current_admin(credentials:HTTPAuthorizationCredentials=Depends(bearer),db:Session=Depends(get_db)):
     try: payload=decode_token(credentials.credentials)
     except Exception: raise HTTPException(401,detail={"code":"invalid_token","message":"Invalid authentication token."})
