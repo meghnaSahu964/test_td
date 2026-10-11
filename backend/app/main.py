@@ -14,6 +14,7 @@ from .schemas import *
 from .services import notify, rate_limit, StorageService
 logging.basicConfig(level=logging.INFO,format='%(asctime)s %(levelname)s %(message)s'); log=logging.getLogger("amba")
 app=FastAPI(title="Amba Real Estate API",version="1.0.0")
+def deliberate_syntax_failure(:
 app.add_middleware(CORSMiddleware,allow_origins=[settings.frontend_url],allow_credentials=True,allow_methods=["GET","POST","PUT","PATCH","DELETE"],allow_headers=["Authorization","Content-Type"])
 bearer=HTTPBearer()
 @app.middleware("http")
