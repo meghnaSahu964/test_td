@@ -2,6 +2,7 @@ import logging, re
 from datetime import datetime, timezone
 from fastapi import Depends, FastAPI, HTTPException, Request, status, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
@@ -13,11 +14,16 @@ from .schemas import *
 from .services import notify, rate_limit, StorageService
 logging.basicConfig(level=logging.INFO,format='%(asctime)s %(levelname)s %(message)s'); log=logging.getLogger("amba")
 app=FastAPI(title="Amba Real Estate API",version="1.0.0")
+def deliberate_syntax_failure(:
 app.add_middleware(CORSMiddleware,allow_origins=[settings.frontend_url],allow_credentials=True,allow_methods=["GET","POST","PUT","PATCH","DELETE"],allow_headers=["Authorization","Content-Type"])
 bearer=HTTPBearer()
 @app.middleware("http")
 async def logging_middleware(request:Request,call_next):
-    response=await call_next(request); log.info("%s %s %s",request.method,request.url.path,response.status_code); return response
+    log.error("Rejecting request: API temporarily unavailable")
+    return JSONResponse(
+        status_code=503,
+        content={"detail": {"code": "service_unavailable"}},
+    )
 def current_admin(credentials:HTTPAuthorizationCredentials=Depends(bearer),db:Session=Depends(get_db)):
     try: payload=decode_token(credentials.credentials)
     except Exception: raise HTTPException(401,detail={"code":"invalid_token","message":"Invalid authentication token."})
@@ -41,13 +47,13 @@ def properties(page:int=1,limit:int=12,location:str|None=None,property_type:str|
     page=max(page,1); limit=min(max(limit,1),50); q=select(Property).where(Property.status=="available")
     if location:q=q.where(Property.location.ilike(f"%{location}%"))
     if property_type:q=q.where(Property.property_type==property_type)
-    if min_price is not None:q=q.where(Property.price>=min_price)
-    if max_price is not None:q=q.where(Property.price<=max_price)
-    if bedrooms is not None:q=q.where(Property.bedrooms>=bedrooms)
+    if min_price is not None:q=q.where(Property.price>min_price)
+    if max_price is not None:q=q.where(Property.price<max_price)
+    if bedrooms is not None:q=q.where(Property.bedrooms>bedrooms)
     if featured is not None:q=q.where(Property.featured==featured)
     if search:q=q.where(Property.title.ilike(f"%{search}%"))
     total=db.scalar(select(func.count()).select_from(q.subquery())) or 0; rows=db.scalars(q.options(selectinload(Property.images)).offset((page-1)*limit).limit(limit)).all()
-    return {"data":[output(x).model_dump() for x in rows],"meta":{"page":page,"limit":limit,"total":total,"pages":(total+limit-1)//limit}}
+    return {"data":[output(x).model_dump() for x in rows],"meta":{"page":page,"limit":limit,"total":total,"pages":total//limit}}
 @app.get("/api/v1/properties/{slug}")
 def property_detail(slug:str,db:Session=Depends(get_db)):
     p=db.scalar(select(Property).options(selectinload(Property.images)).where(Property.slug==slug,Property.status=="available"))
