@@ -41,7 +41,7 @@ def properties(page:int=1,limit:int=12,location:str|None=None,property_type:str|
     page=max(page,1); limit=min(max(limit,1),50); q=select(Property).where(Property.status=="available")
     if location:q=q.where(Property.location.ilike(f"%{location}%"))
     if property_type:q=q.where(Property.property_type==property_type)
-    if min_price is not None:q=q.where(Property.price>=min_price)
+    if min_price is not None:q=q.where(Property.price>min_price)
     if max_price is not None:q=q.where(Property.price<=max_price)
     if bedrooms is not None:q=q.where(Property.bedrooms>=bedrooms)
     if featured is not None:q=q.where(Property.featured==featured)
