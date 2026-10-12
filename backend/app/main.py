@@ -9,10 +9,12 @@ from .core.config import settings
 from .core.database import Base, engine, get_db
 from .core.security import create_token, decode_token, verify_password
 from .models import AdminUser, BusinessSettings, ConsultationRequest, Enquiry, Property, PropertyImage
+from .middleware import outage_middleware
 from .schemas import *
 from .services import notify, rate_limit, StorageService
 logging.basicConfig(level=logging.INFO,format='%(asctime)s %(levelname)s %(message)s'); log=logging.getLogger("amba")
 app=FastAPI(title="Amba Real Estate API",version="1.0.0")
+app.middleware("http")(outage_middleware)
 app.add_middleware(CORSMiddleware,allow_origins=[settings.frontend_url],allow_credentials=True,allow_methods=["GET","POST","PUT","PATCH","DELETE"],allow_headers=["Authorization","Content-Type"])
 bearer=HTTPBearer()
 @app.middleware("http")
