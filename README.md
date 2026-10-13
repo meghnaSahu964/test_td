@@ -1,6 +1,6 @@
 # Amba Real Estate
 
-## Install and develop
+## Install and developement
 
 ```bash
 npm install
